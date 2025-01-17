@@ -30,6 +30,7 @@ public class BookController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ArrayList<Book> getAll() throws ResponseStatusException {
         if (books.size() > 0) {
             return books;
@@ -38,6 +39,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public Book getOne(@PathVariable int id) throws ResponseStatusException {
         for (int i = 0; i < books.size(); i++) {
             if(books.get(i).getId() == id) {
@@ -63,6 +65,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public Book delete(@PathVariable int id) throws ResponseStatusException {
         Book deletedBook;
         for(int i = 0; i < books.size(); i++) {
