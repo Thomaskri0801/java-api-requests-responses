@@ -1,7 +1,9 @@
 package com.booleanuk.api.requests;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 @RequestMapping("books")
 public class BookController {
     private ArrayList<Book> books;
+    private HttpServletResponse response;
 
     public BookController() {
         this.books = new ArrayList<>();
@@ -16,30 +19,37 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Book create(@RequestBody Book book) {
-        this.books.add(book);
-
+    public Book create(@RequestBody Book book) throws ResponseStatusException {
+        for (int i = 0; i < books.size(); i++) {
+            if (books.get(i).getTitle().equals(book.getTitle()) && books.get(i).getAuthor().equals(book.getAuthor())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "That book is already created");
+            }
+        }
+        books.add(book);
         return book;
     }
 
     @GetMapping
-    public ArrayList<Book> getAll() {
-        return books;
+    public ArrayList<Book> getAll() throws ResponseStatusException {
+        if (books.size() > 0) {
+            return books;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No books in stock!");
     }
 
     @GetMapping("/{id}")
-    public Book getOne(@PathVariable int id) {
+    public Book getOne(@PathVariable int id) throws ResponseStatusException {
         for (int i = 0; i < books.size(); i++) {
             if(books.get(i).getId() == id) {
                 return books.get(i);
             }
         }
-        return null;
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Could not find the book you where searching for");
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Book update(@PathVariable int id, @RequestBody Book book) {
+    public Book update(@PathVariable int id, @RequestBody Book book) throws ResponseStatusException {
         for (int i = 0; i < books.size(); i++) {
             if (books.get(i).getId() == id) {
                 books.get(i).setTitle(book.getTitle());
@@ -49,11 +59,11 @@ public class BookController {
                 return books.get(i);
             }
         }
-        return null;
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Could not find the book you where searching for");
     }
 
     @DeleteMapping("/{id}")
-    public Book delete(@PathVariable int id) {
+    public Book delete(@PathVariable int id) throws ResponseStatusException {
         Book deletedBook;
         for(int i = 0; i < books.size(); i++) {
             if (books.get(i).getId() == id) {
@@ -62,6 +72,6 @@ public class BookController {
                 return deletedBook;
             }
         }
-        return null;
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Could not find the book you where searching for");
     }
 }
